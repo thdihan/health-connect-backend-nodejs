@@ -12,6 +12,8 @@ type TQueryOptionsResult = {
     sortBy: string;
     sortOrder: string;
 };
+
+export const paginationOptions = ["page", "limit", "sortBy", "sortOrder"];
 export const formatQueryOptions = (
     options: TQueryOptions
 ): TQueryOptionsResult => {
