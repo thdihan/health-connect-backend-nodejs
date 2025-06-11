@@ -1,10 +1,17 @@
 import { equal } from "assert";
 import { Admin, Prisma, UserStatus } from "../../../generated/prisma";
 import { adminSearchableFields } from "./admin.constant";
-import { formatQueryOptions } from "../../../utils/formatQueryOptions";
+import {
+    formatQueryOptions,
+    TQueryOptions,
+} from "../../../utils/formatQueryOptions";
 import prisma from "../../../utils/prisma";
+import { TFilterParams } from "./admin.interface";
 
-const getAllAdminsFromDB = async (params: any, options: any) => {
+const getAllAdminsFromDB = async (
+    params: TFilterParams,
+    options: TQueryOptions
+) => {
     console.log("[LOG : admin.service -> getAllAdminsFromDB()] Called");
     console.log(
         "[LOG : admin.service -> getAllAdminsFromDB()] Params\n",
@@ -51,8 +58,8 @@ const getAllAdminsFromDB = async (params: any, options: any) => {
     if (Object.keys(filterTypes).length > 0) {
         andConditions.push({
             AND: Object.keys(filterTypes).map((key) => ({
-                [key]: {
-                    equals: filterTypes[key],
+                [key as keyof typeof filterTypes]: {
+                    equals: filterTypes[key as keyof typeof filterTypes],
                 },
             })),
         });

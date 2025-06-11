@@ -7,6 +7,7 @@ export const globalErrorHandler = (
     res: Response,
     next: NextFunction
 ) => {
+    console.log("[LOG] : Global Error Handler Called");
     res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: err.name || "Something went wront",
