@@ -1,7 +1,13 @@
-import { Request, Response } from "express";
+import { Request, RequestHandler, Response } from "express";
 import { UserService } from "./user.service";
 import { uploadToCloud } from "../../middlewares/uploadToCloud";
 import { UploadApiResponse } from "cloudinary";
+import { catchAsync } from "../../utils/catchAsync";
+import { pick } from "../../utils/pick";
+import { userFilterableFields, userSearchableFields } from "./user.constant";
+import { paginationOptions } from "../../utils/formatQueryOptions";
+import { sendResponse } from "../../utils/sendResponse";
+import httpStatus from "http-status";
 
 const createAdmin = async (req: Request, res: Response) => {
     console.log("[LOG : user.controller -> createAdmin() ] Called");
@@ -67,7 +73,39 @@ const createDoctor = async (req: Request, res: Response) => {
     }
 };
 
+const getAllUser: RequestHandler = catchAsync(async (req, res) => {
+    const pickedQuery = pick(req.query, userFilterableFields);
+    const options = pick(req.query, paginationOptions);
+    console.log(
+        "[LOG : user.controller -> getAllUser()] Picked Query\n",
+        pickedQuery
+    );
+
+    const result = await UserService.getAllUsersFromDB(pickedQuery, options);
+    sendResponse(res, {
+        status: httpStatus.OK,
+        success: true,
+        message: "Admins fetched successfully",
+        meta: result.meta,
+        data: result.data,
+    });
+});
+
+const changeUserStatus: RequestHandler = catchAsync(async (req, res) => {
+    const { id } = req.params;
+
+    const result = await UserService.changeUserStatus(id, req.body.status);
+    sendResponse(res, {
+        status: httpStatus.OK,
+        success: true,
+        message: "User status changed successfully",
+        data: result,
+    });
+});
+
 export const UserController = {
     createAdmin,
     createDoctor,
+    getAllUser,
+    changeUserStatus,
 };

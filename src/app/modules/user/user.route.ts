@@ -11,6 +11,17 @@ import { UserValidation } from "./user.validation";
 
 const router = express.Router();
 
+router.get(
+    "/",
+    auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
+    UserController.getAllUser
+);
+router.post(
+    "/:id/status",
+    auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
+    UserController.changeUserStatus
+);
+
 router.post(
     "/create-admin",
     auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
