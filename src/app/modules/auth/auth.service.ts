@@ -1,9 +1,6 @@
 import prisma from "../../utils/prisma";
-
 import bcrypt from "bcrypt";
-import jwt, { JwtPayload } from "jsonwebtoken";
 import { JwtHelper } from "../../utils/jwtHelper";
-import { UserService } from "../user/user.service";
 import { UserStatus } from "../../../generated/prisma";
 import config from "../../config";
 import { emailSender } from "../../utils/emailSender";

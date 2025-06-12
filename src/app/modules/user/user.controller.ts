@@ -1,13 +1,22 @@
 import { Request, Response } from "express";
 import { UserService } from "./user.service";
+import { uploadToCloud } from "../../middlewares/uploadToCloud";
+import { UploadApiResponse } from "cloudinary";
 
 const createAdmin = async (req: Request, res: Response) => {
     console.log("[LOG : user.controller -> createAdmin() ] Called");
+    console.log("[LOG : user.controller -> createAdmin() ] file", req.file);
+    console.log("[LOG : user.controller -> createAdmin() ] data", req.body);
 
-    console.log(
-        "[LOG : user.controller -> createAdmin() ] Req Body\n",
-        req.body
-    );
+    if (req.file) {
+        const uploadedImage: UploadApiResponse | undefined =
+            await uploadToCloud(req.file);
+        req.body.admin.profilePhoto = uploadedImage?.secure_url;
+        console.log(
+            "[LOG : user.controller -> createAdmin() ] uploadedImage",
+            uploadedImage
+        );
+    }
 
     try {
         const result = await UserService.createAdminIntoDB(req.body);

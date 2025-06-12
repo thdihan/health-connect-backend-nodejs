@@ -14,8 +14,6 @@ const createAdminIntoDB = async (data: any) => {
         ...data.admin,
     };
 
-    console.log(adminData);
-
     const result = await prisma.$transaction(async (client) => {
         const createdUser = await client.user.create({
             data: userData,
