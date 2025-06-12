@@ -6,7 +6,11 @@ import ApiError from "../errors/ApiError";
 import httpStatus from "http-status";
 
 export const auth = (...roles: string[]) => {
-    return async (req: Request, res: Response, next: NextFunction) => {
+    return async (
+        req: Request & { user?: any },
+        res: Response,
+        next: NextFunction
+    ) => {
         try {
             const token = req.headers.authorization;
 
@@ -17,12 +21,14 @@ export const auth = (...roles: string[]) => {
                 );
             }
 
-            const decodedData = JwtHelper.verifyToken(
+            const verifiedUser = JwtHelper.verifyToken(
                 token,
                 config.jwt.secret as Secret
             );
 
-            if (roles.length && !roles.includes(decodedData.role)) {
+            req.user = verifiedUser;
+
+            if (roles.length && !roles.includes(verifiedUser.role)) {
                 throw new ApiError(
                     httpStatus.FORBIDDEN,
                     "You are forbidden for this api!!!"

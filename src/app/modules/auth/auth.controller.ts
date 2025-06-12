@@ -27,7 +27,7 @@ const refreshToken = catchAsync(async (req: Request, res: Response) => {
     const { refreshToken } = req.cookies;
     const result = await AuthService.refreshToken(refreshToken);
 
-    console.log("[LOG : auth.controller -> login()] Result\n", result);
+    console.log("[LOG : auth.controller -> refreshToken()] Result\n", result);
     sendResponse(res, {
         status: httpStatus.OK,
         success: true,
@@ -36,7 +36,38 @@ const refreshToken = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+const passwordChange = catchAsync(
+    async (req: Request & { user?: any }, res: Response) => {
+        console.log("[LOG : auth.controller -> passwordChange()] Called");
+        const result = await AuthService.passwordChange(req.user, req.body);
+
+        console.log(
+            "[LOG : auth.controller -> passwordChange()] Result\n",
+            result
+        );
+        sendResponse(res, {
+            status: httpStatus.OK,
+            success: true,
+            message: "Password Changed successfully",
+            data: result,
+        });
+    }
+);
+
+const resetPassword = catchAsync(async (req: Request, res: Response) => {
+    const result = await AuthService.resetPassword(req.body);
+
+    sendResponse(res, {
+        status: httpStatus.OK,
+        success: true,
+        message: "Password reset link generated.",
+        data: result,
+    });
+});
+
 export const AuthController = {
     login,
     refreshToken,
+    passwordChange,
+    resetPassword,
 };

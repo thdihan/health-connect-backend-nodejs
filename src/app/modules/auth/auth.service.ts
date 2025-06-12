@@ -78,7 +78,67 @@ const refreshToken = async (token: string) => {
     };
 };
 
+const passwordChange = async (user: any, payload: any) => {
+    console.log("[LOG : auth.service -> passwordChange()] Called");
+    console.log("[LOG : auth.service -> passwordChange()] User", user);
+    console.log("[LOG : auth.service -> passwordChange()] Payload", payload);
+    const userData = await prisma.user.findUniqueOrThrow({
+        where: {
+            email: user.email,
+            status: UserStatus.ACTIVE,
+        },
+    });
+
+    const isCorrectPassword: boolean = await bcrypt.compare(
+        payload.oldPassword,
+        userData.password
+    );
+
+    if (!isCorrectPassword) throw new Error("Password incorrect");
+
+    const hashedPassword = await bcrypt.hash(payload.newPassword, 10);
+
+    const updatedUser = await prisma.user.update({
+        where: {
+            email: userData.email,
+        },
+        data: {
+            password: hashedPassword,
+            needPasswordChange: false,
+        },
+    });
+
+    return {
+        email: updatedUser.email,
+        needPasswordChange: updatedUser.needPasswordChange,
+    };
+};
+
+const resetPassword = async (payload: { email: string }) => {
+    const userData = await prisma.user.findUniqueOrThrow({
+        where: {
+            email: payload.email,
+            status: UserStatus.ACTIVE,
+        },
+    });
+
+    const resetPasswordToken = JwtHelper.generateToken(
+        {
+            email: userData.email,
+            role: userData.role,
+            tokenType: "RESET",
+        },
+        config.jwt.reset_token_secret as string,
+        config.jwt.reset_token_expires_in as string
+    );
+    console.log(
+        "[LOG : auth.service -> resetPassword()] resetPasswordToken\n",
+        resetPasswordToken
+    );
+};
 export const AuthService = {
     login,
     refreshToken,
+    passwordChange,
+    resetPassword,
 };
