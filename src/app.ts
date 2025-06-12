@@ -3,6 +3,7 @@ import cors from "cors";
 import router from "./router";
 import { globalErrorHandler } from "./middlewares/globalErrorHandler";
 import httpStatus from "http-status";
+import cookieParser from "cookie-parser";
 
 const app: Application = express();
 
@@ -13,6 +14,7 @@ app.use(
         extended: true,
     })
 );
+app.use(cookieParser());
 
 app.use("/api/v1", router);
 app.get("/", (req: Request, res: Response) => {

@@ -7,10 +7,10 @@ export const globalErrorHandler = (
     res: Response,
     next: NextFunction
 ) => {
-    console.log("[LOG] : Global Error Handler Called");
+    console.log("[LOG] : Global Error Handler Called", err);
     res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
         success: false,
-        message: err.name || "Something went wront",
+        message: err.message || "Something went wront",
         error: err,
     });
 };
