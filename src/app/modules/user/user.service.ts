@@ -29,6 +29,34 @@ const createAdminIntoDB = async (data: any) => {
     return result;
 };
 
+const createDoctorIntoDB = async (data: any) => {
+    console.log("[LOG : user.service -> createDoctorIntoDB()] Called");
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+    const userData = {
+        email: data.doctor.email,
+        password: hashedPassword,
+        role: UserRole.DOCTOR,
+    };
+    const doctorData = {
+        ...data.doctor,
+    };
+
+    const result = await prisma.$transaction(async (client) => {
+        const createdUser = await client.user.create({
+            data: userData,
+        });
+
+        const createdDoctor = await client.doctor.create({
+            data: doctorData,
+        });
+
+        return createdDoctor;
+    });
+
+    return result;
+};
+
 export const UserService = {
     createAdminIntoDB,
+    createDoctorIntoDB,
 };
