@@ -1,4 +1,6 @@
 import jwt, { JwtPayload, Secret, SignOptions } from "jsonwebtoken";
+import ApiError from "../errors/ApiError";
+import httpStatus from "http-status";
 
 const generateToken = (
     payload: string | object | Buffer,
@@ -18,7 +20,10 @@ const verifyToken = (token: string, secret: Secret) => {
     try {
         decodedData = jwt.verify(token, secret) as JwtPayload;
     } catch (error) {
-        throw new Error("Unauthorized");
+        throw new ApiError(
+            httpStatus.UNAUTHORIZED,
+            "You are not authorized!!!"
+        );
     }
 
     return decodedData;

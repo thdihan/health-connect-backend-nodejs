@@ -4,8 +4,8 @@ import { adminSearchableFields } from "./admin.constant";
 import {
     formatQueryOptions,
     TQueryOptions,
-} from "../../../utils/formatQueryOptions";
-import prisma from "../../../utils/prisma";
+} from "../../utils/formatQueryOptions";
+import prisma from "../../utils/prisma";
 import { TFilterParams } from "./admin.interface";
 
 const getAllAdminsFromDB = async (

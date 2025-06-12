@@ -1,6 +1,6 @@
 import express from "express";
 import { AdminController } from "./admin.controller";
-import { validateRequest } from "../../../middlewares/validateRequest";
+import { validateRequest } from "../../middlewares/validateRequest";
 import { AdminValidationSchema } from "./admin.validation";
 
 const router = express.Router();

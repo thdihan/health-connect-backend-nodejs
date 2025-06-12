@@ -1,10 +1,11 @@
-import prisma from "../../../utils/prisma";
+import prisma from "../../utils/prisma";
 
 import bcrypt from "bcrypt";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { JwtHelper } from "../../../utils/jwtHelper";
+import { JwtHelper } from "../../utils/jwtHelper";
 import { UserService } from "../user/user.service";
 import { UserStatus } from "../../../generated/prisma";
+import config from "../../config";
 
 const login = async (payload: { email: string; password: string }) => {
     console.log("[LOG : auth.service -> login()] Called");
@@ -31,8 +32,8 @@ const login = async (payload: { email: string; password: string }) => {
             email: result.email,
             role: result.role,
         },
-        "ABCEFGH",
-        "15m"
+        config.jwt.secret as string,
+        config.jwt.expires_in as string
     );
 
     const refreshToken = JwtHelper.generateToken(
@@ -40,8 +41,8 @@ const login = async (payload: { email: string; password: string }) => {
             email: result.email,
             role: result.role,
         },
-        "efgghh",
-        "30d"
+        config.jwt.refresh_token_secret as string,
+        config.jwt.refresh_token_expires_in as string
     );
     return {
         accessToken,
@@ -68,8 +69,8 @@ const refreshToken = async (token: string) => {
             email: userData.email,
             role: userData.role,
         },
-        "ABCEFGH",
-        "15m"
+        config.jwt.secret as string,
+        config.jwt.expires_in as string
     );
     return {
         accessToken,

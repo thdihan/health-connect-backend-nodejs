@@ -1,11 +1,11 @@
 import { Request, RequestHandler, Response } from "express";
 import { AdminService } from "./admin.service";
-import { pick } from "../../../utils/pick";
+import { pick } from "../../utils/pick";
 import { adminFilterableFields } from "./admin.constant";
-import { paginationOptions } from "../../../utils/formatQueryOptions";
-import { sendResponse } from "../../../utils/sendResponse";
+import { paginationOptions } from "../../utils/formatQueryOptions";
+import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status";
-import { catchAsync } from "../../../utils/catchAsync";
+import { catchAsync } from "../../utils/catchAsync";
 
 const getAllAdmins: RequestHandler = catchAsync(async (req, res) => {
     const pickedQuery = pick(req.query, adminFilterableFields);
