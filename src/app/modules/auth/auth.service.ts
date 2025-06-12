@@ -6,6 +6,9 @@ import { JwtHelper } from "../../utils/jwtHelper";
 import { UserService } from "../user/user.service";
 import { UserStatus } from "../../../generated/prisma";
 import config from "../../config";
+import { emailSender } from "../../utils/emailSender";
+import ApiError from "../../errors/ApiError";
+import httpStatus from "http-status";
 
 const login = async (payload: { email: string; password: string }) => {
     console.log("[LOG : auth.service -> login()] Called");
@@ -114,7 +117,7 @@ const passwordChange = async (user: any, payload: any) => {
     };
 };
 
-const resetPassword = async (payload: { email: string }) => {
+const forgotPassword = async (payload: { email: string }) => {
     const userData = await prisma.user.findUniqueOrThrow({
         where: {
             email: payload.email,
@@ -135,10 +138,75 @@ const resetPassword = async (payload: { email: string }) => {
         "[LOG : auth.service -> resetPassword()] resetPasswordToken\n",
         resetPasswordToken
     );
+
+    const resetLink =
+        config.reset_password_link +
+        `?userId=${userData.id}&token=${resetPasswordToken}`;
+
+    console.log(
+        "[LOG : auth.service -> resetPassword()] resetLink\n",
+        resetLink
+    );
+
+    await emailSender(
+        userData.email,
+        `
+            <html>
+                <body>
+                    <p>Dear XYZ,</p>
+                    <p>Here is your link for password reset.</p>
+                    <a href="${resetLink}" style="background: #000, color: #fff, padding: 10px 20px">Reset Password</a>
+                </body>
+            </html>
+        `
+    );
+};
+
+const resetPassword = async (token: string, payload: any) => {
+    console.log("[LOG : auth.service -> resetPassword()] token", token);
+    console.log("[LOG : auth.service -> resetPassword()] Payload", payload);
+    const isValidToken = JwtHelper.verifyToken(
+        token,
+        config.jwt.reset_token_secret as string
+    );
+
+    if (!isValidToken) {
+        throw new ApiError(
+            httpStatus.FORBIDDEN,
+            "You are not authorized for this action."
+        );
+    }
+
+    const userData = await prisma.user.findUniqueOrThrow({
+        where: {
+            id: payload.id,
+            status: UserStatus.ACTIVE,
+        },
+    });
+
+    console.log("[LOG : auth.service -> resetPassword()] userData", userData);
+
+    const hashedPassword = await bcrypt.hash(payload.newPassword, 10);
+
+    const updatedUser = await prisma.user.update({
+        where: {
+            email: userData.email,
+        },
+        data: {
+            password: hashedPassword,
+            needPasswordChange: false,
+        },
+    });
+
+    return {
+        email: updatedUser.email,
+        needPasswordChange: updatedUser.needPasswordChange,
+    };
 };
 export const AuthService = {
     login,
     refreshToken,
     passwordChange,
+    forgotPassword,
     resetPassword,
 };
