@@ -19,6 +19,7 @@ router.get(
 router.post(
     "/:id/status",
     auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
+    validateRequest(UserValidation.updateStatus),
     UserController.changeUserStatus
 );
 
