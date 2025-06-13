@@ -22,6 +22,30 @@ router.post(
     validateRequest(UserValidation.updateStatus),
     UserController.changeUserStatus
 );
+router.get(
+    "/me",
+    auth(
+        UserRole.SUPER_ADMIN,
+        UserRole.ADMIN,
+        UserRole.DOCTOR,
+        UserRole.PATIENT
+    ),
+    UserController.getMyProfile
+);
+router.patch(
+    "/update-me",
+    auth(
+        UserRole.SUPER_ADMIN,
+        UserRole.ADMIN,
+        UserRole.DOCTOR,
+        UserRole.PATIENT
+    ),
+    upload.single("file"),
+    (req, res, next) => {
+        req.body = JSON.parse(req.body.data);
+        return UserController.updateMyProfile(req, res, next);
+    }
+);
 
 router.post(
     "/create-admin",

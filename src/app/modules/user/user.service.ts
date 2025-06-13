@@ -6,6 +6,8 @@ import {
     TQueryOptions,
 } from "../../utils/formatQueryOptions";
 import { userSearchableFields } from "./user.constant";
+import _ from "lodash";
+import { TAuthUser } from "../../interface/common";
 
 const createAdminIntoDB = async (data: any) => {
     console.log("[LOG : user.service -> createAdminIntoDB()] Called");
@@ -163,9 +165,71 @@ const changeUserStatus = async (id: string, status: UserStatus) => {
     return result;
 };
 
+const getMyProfile = async (user: TAuthUser) => {
+    const userInfo = await prisma.user.findUniqueOrThrow({
+        where: {
+            email: user.email,
+        },
+        select: {
+            id: true,
+            email: true,
+            role: true,
+            needPasswordChange: true,
+            status: true,
+            admin: true,
+            doctor: true,
+        },
+    });
+
+    const roleKey = userInfo.role.toLowerCase() as keyof typeof userInfo;
+    if (roleKey === "admin" || roleKey === "doctor") {
+        return {
+            id: userInfo.id,
+            email: userInfo.email,
+            role: userInfo.role,
+            needPasswordChange: userInfo.needPasswordChange,
+            status: userInfo.status,
+            ...userInfo[roleKey],
+        };
+    }
+};
+
+const updateMyProfile = async (user: TAuthUser, payload: any) => {
+    const userData = await prisma.user.findUniqueOrThrow({
+        where: {
+            email: user.email,
+            status: UserStatus.ACTIVE,
+        },
+    });
+
+    let profileInfo;
+    if (
+        userData.role === UserRole.SUPER_ADMIN ||
+        userData.role === UserRole.ADMIN
+    ) {
+        profileInfo = await prisma.admin.update({
+            where: {
+                email: userData.email,
+            },
+            data: payload,
+        });
+    } else if (userData.role === UserRole.DOCTOR) {
+        profileInfo = await prisma.doctor.update({
+            where: {
+                email: userData.email,
+            },
+            data: payload,
+        });
+    }
+
+    return profileInfo;
+};
+
 export const UserService = {
     createAdminIntoDB,
     createDoctorIntoDB,
     getAllUsersFromDB,
     changeUserStatus,
+    getMyProfile,
+    updateMyProfile,
 };

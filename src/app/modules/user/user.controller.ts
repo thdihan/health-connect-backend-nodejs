@@ -8,6 +8,7 @@ import { userFilterableFields, userSearchableFields } from "./user.constant";
 import { paginationOptions } from "../../utils/formatQueryOptions";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status";
+import { TAuthUser } from "../../interface/common";
 
 const createAdmin = async (req: Request, res: Response) => {
     console.log("[LOG : user.controller -> createAdmin() ] Called");
@@ -103,9 +104,66 @@ const changeUserStatus: RequestHandler = catchAsync(async (req, res) => {
     });
 });
 
+const getMyProfile = catchAsync(
+    async (req: Request & { user?: TAuthUser }, res) => {
+        const user = req.user;
+
+        console.log("[LOG : user.controller -> getMyProfile()] user\n", user);
+
+        const result = await UserService.getMyProfile(user as TAuthUser);
+        sendResponse(res, {
+            status: httpStatus.OK,
+            success: true,
+            message: "Profile fetched successfully",
+            data: result,
+        });
+    }
+);
+const updateMyProfile = catchAsync(
+    async (req: Request & { user?: TAuthUser }, res) => {
+        const user = req.user;
+
+        console.log(
+            "[LOG : user.controller -> updateMyProfile()] user\n",
+            user
+        );
+        console.log(
+            "[LOG : user.controller -> getMyProfile()] file\n",
+            req.file
+        );
+
+        if (req.file) {
+            const uploadedImage: UploadApiResponse | undefined =
+                await uploadToCloud(req.file);
+            req.body.profilePhoto = uploadedImage?.secure_url;
+            console.log(
+                "[LOG : user.controller -> getMyProfile() ] uploadedImage",
+                uploadedImage
+            );
+        }
+
+        console.log(
+            "[LOG : user.controller -> updateMyProfile()] data\n",
+            req.body
+        );
+        const result = await UserService.updateMyProfile(
+            user as TAuthUser,
+            req.body
+        );
+        sendResponse(res, {
+            status: httpStatus.OK,
+            success: true,
+            message: "Profile updated successfully",
+            data: result,
+        });
+    }
+);
+
 export const UserController = {
     createAdmin,
     createDoctor,
     getAllUser,
     changeUserStatus,
+    getMyProfile,
+    updateMyProfile,
 };
