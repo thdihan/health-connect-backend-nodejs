@@ -1,4 +1,3 @@
-import { equal } from "assert";
 import { Admin, Prisma, UserStatus } from "../../../generated/prisma";
 import { adminSearchableFields } from "./admin.constant";
 import {
