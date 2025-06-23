@@ -7,8 +7,8 @@ export const sendResponse = <T>(
         success: boolean;
         message: string;
         meta?: {
-            page: number;
-            limit: number;
+            page?: number;
+            limit?: number;
             total: number;
         };
         data?: T | null | undefined;

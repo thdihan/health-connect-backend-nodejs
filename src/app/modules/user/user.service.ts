@@ -168,7 +168,7 @@ const changeUserStatus = async (id: string, status: UserStatus) => {
 const getMyProfile = async (user: TAuthUser) => {
     const userInfo = await prisma.user.findUniqueOrThrow({
         where: {
-            email: user.email,
+            email: user?.email,
         },
         select: {
             id: true,
@@ -197,7 +197,7 @@ const getMyProfile = async (user: TAuthUser) => {
 const updateMyProfile = async (user: TAuthUser, payload: any) => {
     const userData = await prisma.user.findUniqueOrThrow({
         where: {
-            email: user.email,
+            email: user?.email,
             status: UserStatus.ACTIVE,
         },
     });
