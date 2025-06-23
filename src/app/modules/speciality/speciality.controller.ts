@@ -40,13 +40,26 @@ const getSpecialities = catchAsync(async (req, res) => {
     sendResponse(res, {
         status: httpStatus.OK,
         success: true,
-        message: "Speciality fetched successfully",
+        message: "Specialities fetched successfully",
         meta: result.meta,
         data: result.data,
+    });
+});
+
+const getSpecialityById = catchAsync(async (req, res) => {
+    const { id } = req.params;
+    const result = await SpecialityService.getSpecialityById(id);
+
+    sendResponse(res, {
+        status: httpStatus.OK,
+        success: true,
+        message: "Speciality fetched successfully",
+        data: result,
     });
 });
 
 export const SpecialityController = {
     addSpeciality,
     getSpecialities,
+    getSpecialityById,
 };

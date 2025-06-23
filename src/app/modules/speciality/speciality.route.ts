@@ -13,4 +13,5 @@ router.post("/", upload.single("file"), (req, res, next) => {
 });
 
 router.get("/", SpecialityController.getSpecialities);
+router.get("/:id", SpecialityController.getSpecialityById);
 export const SpecialityRoutes = router;

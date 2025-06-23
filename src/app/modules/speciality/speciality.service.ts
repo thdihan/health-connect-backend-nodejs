@@ -23,7 +23,18 @@ const getSpecialities = async () => {
     };
 };
 
+const getSpecialityById = async (id: string) => {
+    const result = await prisma.specialties.findUnique({
+        where: {
+            id,
+        },
+    });
+
+    return result;
+};
+
 export const SpecialityService = {
     addSpeciality,
     getSpecialities,
+    getSpecialityById,
 };
