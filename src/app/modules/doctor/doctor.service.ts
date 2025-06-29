@@ -1,4 +1,4 @@
-import { Prisma } from "../../../generated/prisma";
+import { Prisma, UserStatus } from "../../../generated/prisma";
 import {
     formatQueryOptions,
     TQueryOptions,
@@ -85,6 +85,67 @@ const getAllDoctor = async (params: TFilterParams, options: TQueryOptions) => {
     };
 };
 
+const getDoctorById = async (doctorId: string) => {
+    const result = await prisma.doctor.findUniqueOrThrow({
+        where: {
+            id: doctorId,
+            isDeleted: false,
+        },
+    });
+
+    return result;
+};
+
+const deleteDoctor = async (doctorId: string) => {
+    const result = await prisma.$transaction(async (client) => {
+        const deletedDoctor = await client.doctor.delete({
+            where: {
+                id: doctorId,
+            },
+        });
+
+        await client.user.delete({
+            where: {
+                email: deletedDoctor.email,
+            },
+        });
+
+        return deletedDoctor;
+    });
+
+    return result;
+};
+
+const softDeleteDoctor = async (doctorId: string) => {
+    const result = await prisma.$transaction(async (client) => {
+        const deletedDoctor = await client.doctor.update({
+            where: {
+                id: doctorId,
+                isDeleted: false,
+            },
+            data: {
+                isDeleted: true,
+            },
+        });
+
+        await client.user.update({
+            where: {
+                email: deletedDoctor.email,
+            },
+            data: {
+                status: UserStatus.DELETED,
+            },
+        });
+
+        return deletedDoctor;
+    });
+
+    return result;
+};
+
 export const DoctorService = {
     getAllDoctor,
+    deleteDoctor,
+    softDeleteDoctor,
+    getDoctorById,
 };

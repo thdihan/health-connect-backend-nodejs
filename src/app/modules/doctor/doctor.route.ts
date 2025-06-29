@@ -11,4 +11,20 @@ router.get(
     DoctorController.getAllDoctor
 );
 
+router.get(
+    "/:id",
+    auth(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.DOCTOR),
+    DoctorController.getDoctorById
+);
+router.patch(
+    "/soft/:id",
+    auth(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.DOCTOR),
+    DoctorController.softDeleteDoctor
+);
+router.delete(
+    "/:id",
+    auth(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.DOCTOR),
+    DoctorController.deleteDoctor
+);
+
 export const DoctorRoutes = router;
