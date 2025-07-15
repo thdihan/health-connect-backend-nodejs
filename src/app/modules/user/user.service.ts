@@ -63,6 +63,37 @@ const createDoctorIntoDB = async (data: any) => {
     return result;
 };
 
+const createPatientIntoDB = async (data: any) => {
+    console.log("[LOG : user.service -> createPatientIntoDB()] Called");
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+    const userData = {
+        email: data.patient.email,
+        password: hashedPassword,
+        role: UserRole.PATIENT,
+    };
+    const patientData = {
+        ...data.patient,
+    };
+
+    console.log(
+        "[LOG : user.service -> createPatientIntoDB()] patientData",
+        patientData
+    );
+    const result = await prisma.$transaction(async (client) => {
+        const createdUser = await client.user.create({
+            data: userData,
+        });
+
+        const createdPatient = await client.patient.create({
+            data: patientData,
+        });
+
+        return createdPatient;
+    });
+
+    return result;
+};
+
 const getAllUsersFromDB = async (params: any, options: TQueryOptions) => {
     console.log("[LOG : user.service -> getAllUsersFromDB()] Called");
     console.log("[LOG : user.service -> getAllUsersFromDB()] Params\n", params);
@@ -232,4 +263,5 @@ export const UserService = {
     changeUserStatus,
     getMyProfile,
     updateMyProfile,
+    createPatientIntoDB,
 };

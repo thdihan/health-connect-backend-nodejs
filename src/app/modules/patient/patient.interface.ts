@@ -3,7 +3,4 @@ export type TFilterParams = {
     name?: string | undefined;
     searchTerm?: string | undefined;
     contactNumber?: string | undefined;
-    registrationNumber?: string | undefined;
-    designation?: string | undefined;
-    specialities?: string | undefined;
 };

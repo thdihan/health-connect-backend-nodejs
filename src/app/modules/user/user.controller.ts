@@ -73,6 +73,37 @@ const createDoctor = async (req: Request, res: Response) => {
         });
     }
 };
+const createPatient = async (req: Request, res: Response) => {
+    console.log("[LOG : user.controller -> createPatient() ] Called");
+    console.log("[LOG : user.controller -> createPatient() ] file", req.file);
+    console.log("[LOG : user.controller -> createPatient() ] data", req.body);
+
+    if (req.file) {
+        const uploadedImage: UploadApiResponse | undefined =
+            await uploadToCloud(req.file);
+        req.body.patient.profilePhoto = uploadedImage?.secure_url;
+        console.log(
+            "[LOG : user.controller -> createPatient() ] uploadedImage",
+            uploadedImage
+        );
+    }
+
+    try {
+        const result = await UserService.createPatientIntoDB(req.body);
+
+        res.status(200).json({
+            success: true,
+            message: "Patient created successfully",
+            result: result,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to create patient.",
+            error: error,
+        });
+    }
+};
 
 const getAllUser: RequestHandler = catchAsync(async (req, res) => {
     const pickedQuery = pick(req.query, userFilterableFields);
@@ -166,4 +197,5 @@ export const UserController = {
     changeUserStatus,
     getMyProfile,
     updateMyProfile,
+    createPatient,
 };

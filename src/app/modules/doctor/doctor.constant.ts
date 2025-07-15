@@ -6,4 +6,5 @@ export const doctorFilterableFields = [
     "contactNumber",
     "registrationNumber",
     "designation",
+    "specialities",
 ];

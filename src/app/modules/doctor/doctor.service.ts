@@ -12,13 +12,17 @@ const getAllDoctor = async (params: TFilterParams, options: TQueryOptions) => {
     console.log("[LOG : doctor.service -> getAllDoctor()] Called");
     console.log("[LOG : doctor.service -> getAllDoctor()] Params\n", params);
 
-    const { searchTerm, ...filterTypes } = params;
+    const { searchTerm, specialities, ...filterTypes } = params;
     const { page, skip, limit, sortBy, sortOrder } =
         formatQueryOptions(options);
 
     console.log(
         "[LOG : doctor.service -> getAllDoctor()] Search Term\n",
         searchTerm
+    );
+    console.log(
+        "[LOG : doctor.service -> getAllDoctor()] Specialities\n",
+        specialities
     );
 
     console.log(
@@ -47,6 +51,21 @@ const getAllDoctor = async (params: TFilterParams, options: TQueryOptions) => {
         });
     }
 
+    if (specialities && specialities.length > 0) {
+        andConditions.push({
+            doctorSpecialties: {
+                some: {
+                    specialities: {
+                        title: {
+                            contains: specialities,
+                            mode: "insensitive",
+                        },
+                    },
+                },
+            },
+        });
+    }
+
     if (Object.keys(filterTypes).length > 0) {
         andConditions.push({
             AND: Object.keys(filterTypes).map((key) => ({
@@ -69,6 +88,13 @@ const getAllDoctor = async (params: TFilterParams, options: TQueryOptions) => {
         take: limit,
         orderBy: {
             [sortBy]: sortOrder,
+        },
+        include: {
+            doctorSpecialties: {
+                include: {
+                    specialities: true,
+                },
+            },
         },
     });
 
