@@ -1,3 +1,4 @@
+import { boolean } from "zod";
 import { Prisma, UserStatus } from "../../../generated/prisma";
 import {
     formatQueryOptions,
@@ -143,9 +144,84 @@ const softDeleteDoctor = async (doctorId: string) => {
     return result;
 };
 
+const updateDoctor = async (id: string, payload: any) => {
+    console.log("[LOG : doctor.service -> updateDoctor()] Called");
+    console.log("[LOG : doctor.service -> updateDoctor()] Id\n", id);
+
+    const { specialities, ...doctorData } = payload;
+
+    console.log(
+        "[LOG : doctor.service -> updateDoctor()] specialities\n",
+        specialities
+    );
+    console.log(
+        "[LOG : doctor.service -> updateDoctor()] doctorData\n",
+        doctorData
+    );
+
+    const currentDoctorData = await prisma.doctor.findUniqueOrThrow({
+        where: {
+            id,
+        },
+        include: {
+            doctorSpecialties: true,
+        },
+    });
+
+    const result = await prisma.$transaction(async (client) => {
+        const deleteSpecialityList = specialities.filter(
+            (speciality: { id: string; isDeleted: boolean }) =>
+                speciality.isDeleted
+        );
+
+        for (const speciality of deleteSpecialityList) {
+            console.log(
+                "[LOG : doctor.service -> updateDoctor()] Deleting Speciality\n",
+                speciality
+            );
+            await client.doctorSpecialties.deleteMany({
+                where: {
+                    doctorId: id,
+                    specialitiesId: speciality.id,
+                },
+            });
+        }
+
+        const createSpecialityList = specialities.filter(
+            (speciality: { id: string; isDeleted: boolean }) =>
+                !speciality.isDeleted
+        );
+        for (const speciality of createSpecialityList) {
+            console.log(
+                "[LOG : doctor.service -> updateDoctor()] Creating Speciality\n",
+                speciality
+            );
+            await client.doctorSpecialties.create({
+                data: {
+                    doctorId: id,
+                    specialitiesId: speciality.id,
+                },
+            });
+        }
+        const updatedDoctor = await client.doctor.update({
+            where: {
+                id,
+            },
+            data: doctorData,
+            include: {
+                doctorSpecialties: true,
+            },
+        });
+
+        return updatedDoctor;
+    });
+
+    return result;
+};
 export const DoctorService = {
     getAllDoctor,
     deleteDoctor,
     softDeleteDoctor,
     getDoctorById,
+    updateDoctor,
 };
