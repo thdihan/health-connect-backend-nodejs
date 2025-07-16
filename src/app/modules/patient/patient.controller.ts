@@ -35,7 +35,20 @@ const getByIdFromDB = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+const updatePatient = catchAsync(async (req, res) => {
+    const { id } = req.params;
+
+    const result = await PatientService.updatePatient(id, req.body);
+    sendResponse(res, {
+        status: httpStatus.OK,
+        success: true,
+        message: "Patient updated successfully",
+        data: result,
+    });
+});
+
 export const PatientController = {
     getAllFromDB,
     getByIdFromDB,
+    updatePatient,
 };

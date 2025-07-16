@@ -104,7 +104,80 @@ const getByIdFromDB = async (id: string): Promise<Patient | null> => {
     return result;
 };
 
+const updatePatient = async (
+    id: string,
+    payload: any
+): Promise<Patient | null> => {
+    console.log("[LOG : patient.service -> updatePatient()] Called");
+    console.log("[LOG : patient.service -> updatePatient()] Id", id);
+    console.log("[LOG : patient.service -> updatePatient()] Payload", payload);
+
+    const { patientHealthData, medicalReport, ...patientData } = payload;
+
+    console.log(
+        "[LOG : patient.service -> updatePatient()] patientHealthData",
+        patientHealthData
+    );
+    console.log(
+        "[LOG : patient.service -> updatePatient()] medicalReport",
+        medicalReport
+    );
+
+    await prisma.patient.findUniqueOrThrow({
+        where: {
+            id,
+        },
+    });
+
+    const result = await prisma.$transaction(async (client) => {
+        // Create Patient health data
+        if (patientHealthData) {
+            await client.patientHealthData.upsert({
+                where: {
+                    patientId: id,
+                },
+                update: patientHealthData,
+                create: { patientId: id, ...patientHealthData },
+            });
+        }
+
+        // Create medical report
+        if (medicalReport) {
+            await client.medicalReport.create({
+                data: { patientId: id, ...medicalReport },
+            });
+        }
+
+        // Update Patient
+        const updatedPatient = await prisma.patient.update({
+            where: {
+                id: id,
+            },
+            data: patientData,
+            include: {
+                MedicalReport: true,
+                patientHealthData: true,
+            },
+        });
+        return updatedPatient;
+    });
+
+    const updatedPatient = await prisma.patient.findUnique({
+        where: {
+            id,
+            isDeleted: false,
+        },
+        include: {
+            MedicalReport: true,
+            patientHealthData: true,
+        },
+    });
+
+    return updatedPatient;
+};
+
 export const PatientService = {
     getAllPatient,
     getByIdFromDB,
+    updatePatient,
 };
