@@ -9,7 +9,7 @@ router.get("/:id", PatientController.getByIdFromDB);
 
 router.patch("/:id", PatientController.updatePatient);
 
-// router.delete("/:id", PatientController.deleteFromDB);
-// router.delete("/soft/:id", PatientController.softDelete);
+router.delete("/:id", PatientController.deletePatient);
+router.delete("/soft/:id", PatientController.softDeletePatient);
 
 export const PatientRoutes = router;

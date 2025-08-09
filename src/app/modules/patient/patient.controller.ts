@@ -47,8 +47,34 @@ const updatePatient = catchAsync(async (req, res) => {
     });
 });
 
+const deletePatient = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    const result = await PatientService.deletePatient(id);
+    sendResponse(res, {
+        status: httpStatus.OK,
+        success: true,
+        message: "Patient deleted successfully",
+        data: result,
+    });
+});
+
+const softDeletePatient = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    const result = await PatientService.softDeletePatient(id);
+    sendResponse(res, {
+        status: httpStatus.OK,
+        success: true,
+        message: "Patient deleted successfully",
+        data: result,
+    });
+});
+
 export const PatientController = {
     getAllFromDB,
     getByIdFromDB,
     updatePatient,
+    deletePatient,
+    softDeletePatient,
 };
